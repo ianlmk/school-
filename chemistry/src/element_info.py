@@ -1,20 +1,25 @@
-#!/bin/bash python
 """
 Created by: Ian LaMotte-Kerr
 """
-
 import pandas as pd
 import argparse
 from tabulate import tabulate
+
 ##############################################################
 # format of the data held in the periodic table to work with #
 ##############################################################
+
 """
 columns=["AtomicNumber","Element","Symbol","AtomicMass","NumberofNeutrons","NumberofProtons","NumberofElectrons","Period","Group","Phase","Radioactive","Natural","Metal","Nonmetal","Metalloid","Type","AtomicRadius","Electronegativity","FirstIonization","Density","MeltingPoint","BoilingPoint","NumberOfIsotopes","Discoverer","Year","SpecificHeat","NumberofShells","NumberofValence"]
 """
+
 table_file="periodic_table"
 element_df = pd.read_csv(table_file,header=0)
 element_dataframe=element_df.astype(str)
+
+####################################
+# program functions, mainly pandas #
+####################################
 
 def get_args(argv=None):
   parser = argparse.ArgumentParser(description='Generate element information from a verbose periodic table')
@@ -23,8 +28,12 @@ def get_args(argv=None):
   return parser.parse_args(argv)
 
 def get_element_data(category, string):
+  if string == "all": 
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+      print(tabulate(element_dataframe, headers ='keys', tablefmt="grid"))
+  else:
     data = element_dataframe.loc[element_dataframe[category] == string ]
-    print (tabulate(data, headers ='keys', tablefmt ='psql'))
+    print(tabulate(data, headers ='keys', tablefmt ='simple'))
 
 def get_column(string):
   columns=element_dataframe.head()
@@ -38,6 +47,9 @@ def element_dict():
   element_obj=element_dataframe.to_dict(orient='records')
   return element_obj
 
+def df_schema():
+    print(element_dataframe.info())
+
 def main():
   argvals=None
   args=get_args(argvals)
@@ -50,6 +62,9 @@ def main():
   if number != "" and number != None:
     string = number  
     category = 'atomic number'
+  if (name == "" or name == None) and (number == None or number == ""): 
+    string = "all"
+    category = None
     
   get_element_data(category,string)
 
